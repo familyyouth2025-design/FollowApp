@@ -1,9 +1,14 @@
 const { Pool } = require('pg');
-const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
+// Fix truncated Render internal DB URLs by appending the region if missing
+let databaseUrl = process.env.DATABASE_URL || '';
+if (databaseUrl.includes('@dpg-') && !databaseUrl.includes('postgres.render.com')) {
+  databaseUrl = databaseUrl.replace('/followapp', '.oregon-postgres.render.com/followapp');
+}
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: databaseUrl,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('error', (err) => {
