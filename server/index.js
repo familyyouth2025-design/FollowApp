@@ -5,21 +5,9 @@ const path = require('path');
 
 const app = express();
 
-// Auto-create missing tables
-const db = require('./db');
-async function initDB() {
-  await db.query(`
-    CREATE TABLE IF NOT EXISTS saved_messages (
-      id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-      name VARCHAR(100) NOT NULL,
-      template TEXT NOT NULL,
-      created_by UUID REFERENCES admins(id) ON DELETE SET NULL,
-      created_at TIMESTAMPTZ DEFAULT NOW()
-    )
-  `);
-  console.log('Database tables initialized');
-}
-initDB().catch(err => console.error('DB init error:', err.message));
+// Auto-create all tables and default admin on startup
+const setupDatabase = require('./setup-db');
+setupDatabase().catch(err => console.error('DB setup error:', err.message));
 
 // Initialize WhatsApp client on startup
 const { initClient } = require('./whatsapp');

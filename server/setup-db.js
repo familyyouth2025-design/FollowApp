@@ -1,60 +1,33 @@
 const fs = require('fs');
 const path = require('path');
-const { Pool } = require('pg');
+const db = require('./db');
 
-const pool = new Pool({
-  host: 'localhost',
-  port: 5432,
-  user: 'postgres',
-  password: 'Shalom7$',
-  database: 'postgres',
-});
-
-async function setup() {
-  const client = await pool.connect();
+async function setupDatabase() {
   try {
-    // Create database if not exists
-    const dbExists = await client.query("SELECT 1 FROM pg_database WHERE datname = 'sayet'");
-    if (dbExists.rowCount === 0) {
-      await client.query('CREATE DATABASE sayet');
-      console.log('Database "sayet" created');
+    // Run schema.sql to create all tables
+    const schemaPath = path.join(__dirname, '..', 'db', 'schema.sql');
+    const schema = fs.readFileSync(schemaPath, 'utf8');
+    await db.query(schema);
+    console.log('✅ Database tables created successfully');
+
+    // Create default admin if none exists
+    const bcrypt = require('bcrypt');
+    const result = await db.query('SELECT * FROM admins LIMIT 1');
+    
+    if (result.rows.length === 0) {
+      const passwordHash = await bcrypt.hash('admin123', 10);
+      await db.query(`
+        INSERT INTO admins (first_name, surname, cell, email, password_hash, role, province, city, church)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      `, ['Admin', 'User', '0123456789', 'admin@sayet.com', passwordHash, 'super_admin', 'Gauteng', 'Johannesburg', 'Head Office']);
+      console.log('✅ Default admin created: admin@sayet.com / admin123');
     } else {
-      console.log('Database "sayet" already exists');
+      console.log('ℹ️ Admin already exists, skipping default admin creation');
     }
-    client.release();
-
-    // Connect to sayet database
-    const sayetPool = new Pool({
-      host: 'localhost',
-      port: 5432,
-      user: 'postgres',
-      password: 'Shalom7$',
-      database: 'sayet',
-    });
-
-    const sayetClient = await sayetPool.connect();
-    try {
-      // Run schema
-      const schemaPath = path.join(__dirname, '..', 'db', 'schema.sql');
-      const schemaSQL = fs.readFileSync(schemaPath, 'utf-8');
-      await sayetClient.query(schemaSQL);
-      console.log('Schema applied successfully');
-
-      // Run seed
-      const seedPath = path.join(__dirname, '..', 'db', 'seed.sql');
-      const seedSQL = fs.readFileSync(seedPath, 'utf-8');
-      await sayetClient.query(seedSQL);
-      console.log('Seed data inserted successfully');
-    } finally {
-      sayetClient.release();
-    }
-    await sayetPool.end();
-  } finally {
-    await pool.end();
+  } catch (err) {
+    console.error('❌ Database setup error:', err.message);
+    throw err;
   }
 }
 
-setup().catch(err => {
-  console.error('Setup failed:', err.message);
-  process.exit(1);
-});
+module.exports = setupDatabase;
