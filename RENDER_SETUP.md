@@ -9,12 +9,21 @@
 5. Render will read your `render.yaml` and create:
    - ✅ Free web service (`sayet-server`)
    - ✅ Free static site (`sayet-client`)
-   - ✅ Free PostgreSQL database (`sayet-db`) — **90-day limit**
-6. **Wait 2-5 minutes** for everything to build and deploy
+6. **Set `DATABASE_URL` manually** (see error fix below)
+7. **Wait 2-5 minutes** for everything to build and deploy
 
 ## Option 2: Manual Way (if Blueprint fails)
 
-### Step 1: Create PostgreSQL Database
+### Step 1: PostgreSQL Database
+
+**⚠️ Render only allows ONE free database per account.**
+
+**If you already have a free database:**
+1. Go to your existing database in the Render dashboard
+2. Copy the **Internal Database URL**
+3. Use that URL in Step 2 below
+
+**If you don't have a database yet:**
 1. Go to https://dashboard.render.com/new/database
 2. Name: `sayet-db`
 3. Plan: **Starter (Free)**
@@ -39,6 +48,8 @@
    ```
 5. Click "Create Web Service"
 
+**💡 Note:** If using Blueprint and you see "cannot have more than one active free tier database", the Blueprint will still create the web services. Just manually add `DATABASE_URL` to the server service after it deploys.
+
 ### Step 3: Create Static Site (Frontend)
 1. Go to https://dashboard.render.com/new/static
 2. Connect your GitHub repo
@@ -60,10 +71,15 @@
 | Database | 90 days only, then deleted |
 | Storage | 1GB limit |
 | Bandwidth | 100GB/month |
+| Databases | **Only 1 free database per account** |
 
 **To prevent database deletion after 90 days**, either:
 - Upgrade to **Starter** ($7/month), or
 - Export/backup your data before 90 days
+
+**If you already have a free database:**
+- Reuse it by copying its `DATABASE_URL` into your web service environment variables
+- You **cannot** create a second free database — you must delete the old one first
 
 ## After Deploy
 
