@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Environment
+.env
+.env.local
+
+# Uploads
+server/uploads/
+
+# WhatsApp auth
+.wwebjs_auth/
+.wwebjs_cache/
+
+# Build
+client/dist/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

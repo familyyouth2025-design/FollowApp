@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SAYET Admin Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --green: #1a7a4a;
+  --green-light: #e8f5ee;
+  --green-mid: #2ea866;
+  --gold: #c9920a;
+  --gold-light: #fdf3dc;
+  --black: #0f1410;
+  --surface: #f7f9f8;
+  --surface2: #eef2ef;
+  --border: #d4ddd7;
+  --text: #1a2420;
+  --text-muted: #5a7065;
+  --danger: #c0392b;
+  --danger-light: #fdecea;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(10,40,20,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text); min-height: 100vh; }
+
+/* LOGIN */
+#login-screen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f2818 0%, #1a4a2a 60%, #0d1f15 100%);
+  position: fixed; inset: 0; z-index: 100;
+}
+.login-card {
+  background: white; border-radius: 16px; padding: 48px 40px;
+  width: 100%; max-width: 400px; box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+}
+.login-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px;
+  color: var(--green); letter-spacing: -0.5px; margin-bottom: 6px;
+}
+.login-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 32px; }
+.login-card label { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+.login-card input {
+  width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); font-size: 15px; font-family: inherit;
+  outline: none; transition: border-color 0.2s; margin-bottom: 18px;
+}
+.login-card input:focus { border-color: var(--green); }
+.btn-primary {
+  background: var(--green); color: white; border: none; border-radius: var(--radius);
+  padding: 13px 24px; font-family: 'Syne', sans-serif; font-weight: 600; font-size: 15px;
+  cursor: pointer; width: 100%; transition: background 0.2s;
+}
+.btn-primary:hover { background: #155d38; }
+.login-hint { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 16px; }
+
+/* LAYOUT */
+#app { display: none; min-height: 100vh; }
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
+  background: var(--black); display: flex; flex-direction: column;
+  z-index: 50;
+}
+.sidebar-brand {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: white; line-height: 1.2; }
+.brand-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+.nav-section { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; padding: 8px 8px 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px; cursor: pointer;
+  font-size: 14px; color: rgba(255,255,255,0.65);
+  transition: all 0.15s; margin-bottom: 2px;
+}
+.nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+.nav-item.active { background: var(--green); color: white; }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; }
+.sidebar-bottom { padding: 16px 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+.user-pill { display: flex; align-items: center; gap: 10px; }
+.user-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-family: 'Syne',sans-serif; font-weight: 700; font-size: 13px; color: white; }
+.user-info .name { font-size: 13px; color: white; font-weight: 500; }
+.user-info .role { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+/* MAIN */
+.main { margin-left: 240px; min-height: 100vh; }
+.topbar {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 40;
+}
+.page-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; }
+.topbar-actions { display: flex; align-items: center; gap: 12px; }
+.badge-notif {
+  background: var(--danger); color: white; border-radius: 12px;
+  font-size: 11px; font-weight: 600; padding: 3px 8px; cursor: pointer;
+}
+
+.content { padding: 28px; }
+
+/* STATS */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: white; border-radius: var(--radius); padding: 20px;
+  border: 1px solid var(--border); box-shadow: var(--shadow);
+}
+.stat-label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+.stat-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; margin: 6px 0 2px; }
+.stat-sub { font-size: 12px; color: var(--text-muted); }
+.stat-green .stat-value { color: var(--green); }
+.stat-gold .stat-value { color: var(--gold); }
+.stat-danger .stat-value { color: var(--danger); }
+
+/* SECTION CARD */
+.section-card {
+  background: white; border-radius: var(--radius); border: 1px solid var(--border);
+  box-shadow: var(--shadow); margin-bottom: 24px;
+}
+.section-header {
+  padding: 18px 22px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+.btn-sm {
+  background: var(--green); color: white; border: none; border-radius: 7px;
+  padding: 8px 16px; font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-sm:hover { background: #155d38; }
+.btn-outline {
+  background: transparent; color: var(--green); border: 1.5px solid var(--green);
+  border-radius: 7px; padding: 7px 14px; font-family: inherit; font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+.btn-outline:hover { background: var(--green); color: white; }
+.btn-danger-sm {
+  background: var(--danger-light); color: var(--danger); border: none; border-radius: 6px;
+  padding: 5px 10px; font-size: 12px; cursor: pointer; font-family: inherit;
+}
+
+/* TABLE */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead th {
+  background: var(--surface); padding: 12px 16px; text-align: left;
+  font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase;
+  letter-spacing: 0.5px; border-bottom: 1px solid var(--border);
+}
+tbody td { padding: 13px 16px; border-bottom: 1px solid var(--surface2); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: var(--surface); }
+.pill {
+  display: inline-block; padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.pill-green { background: var(--green-light); color: var(--green); }
+.pill-gold { background: var(--gold-light); color: var(--gold); }
+.pill-danger { background: var(--danger-light); color: var(--danger); }
+.pill-gray { background: var(--surface2); color: var(--text-muted); }
+.flag-warn { background: #fff3cd; color: #856404; border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 22px; }
+.form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1/-1; }
+.form-group label { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.form-group input, .form-group select, .form-group textarea {
+  padding: 10px 12px; border: 1.5px solid var(--border); border-radius: 8px;
+  font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s;
+  background: white;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--green); }
+.form-group textarea { resize: vertical; min-height: 100px; }
+.form-actions { padding: 0 22px 22px; display: flex; gap: 10px; }
+
+/* MSG COMPOSER */
+.msg-template-area {
+  font-family: 'DM Sans', monospace; font-size: 14px; line-height: 1.7;
+  border: 1.5px solid var(--border); border-radius: 8px; padding: 14px;
+  min-height: 180px; resize: vertical; width: 100%; outline: none;
+}
+.msg-template-area:focus { border-color: var(--green); }
+.template-vars { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 22px 16px; }
+.var-chip {
+  background: var(--green-light); color: var(--green); border: 1px solid rgba(26,122,74,0.2);
+  border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: background 0.15s;
+}
+.var-chip:hover { background: #d0ede0; }
+
+/* PROGRESS BAR */
+.progress-wrap { background: var(--surface2); border-radius: 20px; height: 10px; margin-top: 6px; }
+.progress-bar { height: 10px; border-radius: 20px; background: var(--green); transition: width 0.4s; }
+.progress-bar.gold { background: var(--gold); }
+
+/* EVENT CARD */
+.event-card {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; transition: box-shadow 0.2s;
+}
+.event-card:hover { box-shadow: var(--shadow); }
+.event-banner { height: 8px; background: var(--green); }
+.event-body { padding: 16px; }
+.event-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.event-meta { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.6; }
+.event-target { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+.event-amount { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--green); font-size: 18px; }
+.events-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; padding: 22px; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  display: none; align-items: center; justify-content: center; z-index: 200;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 14px; width: 100%; max-width: 560px;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+}
+.modal-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted); line-height: 1; }
+
+/* TABS */
+.tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: 8px; padding: 4px; margin: 0 22px 22px; }
+.tab { padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-muted); transition: all 0.15s; }
+.tab.active { background: white; color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+/* FILTER BAR */
+.filter-bar { display: flex; gap: 10px; padding: 14px 22px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; align-items: center; }
+.filter-bar input, .filter-bar select {
+  padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 7px;
+  font-family: inherit; font-size: 13px; outline: none;
+}
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--green); }
+.filter-bar input { min-width: 200px; }
+
+/* PAGE VIEWS */
+.page { display: none; }
+.page.active { display: block; }
+
+/* NOTIFICATION BAR */
+.notif-bar {
+  background: var(--danger-light); border: 1px solid rgba(192,57,43,0.2);
+  border-radius: var(--radius); padding: 12px 18px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px; font-size: 14px;
+}
+.notif-bar strong { color: var(--danger); }
+
+/* WHATSAPP STATUS */
+.wa-status { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.wa-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--danger); }
+.wa-dot.connected { background: var(--green-mid); }
+
+/* CONTRIBUTION INPUT */
+.contrib-input { display: flex; gap: 6px; align-items: center; }
+.contrib-input input { width: 90px; padding: 6px 8px; border: 1.5px solid var(--border); border-radius: 6px; font-size: 13px; }
+.contrib-input button { padding: 6px 12px; background: var(--green); color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">SAYET Admin Portal</div>
+    <div class="login-sub">SA Youth Economy Taskforce — Secure Access</div>
+    <label>Email Address</label>
+    <input type="email" id="login-email" value="symphonytone@gmail.com" placeholder="admin@sayet.org"/>
+    <label>Password</label>
+    <input type="password" id="login-pass" value="password" placeholder="••••••••"/>
+    <button class="btn-primary" onclick="doLogin()">Sign In</button>
+    <p class="login-hint">Demo: symphonytone@gmail.com / password</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-name">SAYET</div>
+      <div class="brand-sub">Admin Portal</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-section">People</div>
+      <div class="nav-item" onclick="showPage('members',this)">
+        <span class="nav-icon">👥</span> Members
+      </div>
+      <div class="nav-item" onclick="showPage('admins',this)" id="nav-admins">
+        <span class="nav-icon">🛡️</span> Admins
+      </div>
+      <div class="nav-section">Events & Fundraising</div>
+      <div class="nav-item" onclick="showPage('events',this)">
+        <span class="nav-icon">📅</span> Events
+      </div>
+      <div class="nav-item" onclick="showPage('contributions',this)">
+        <span class="nav-icon">💰</span> Contributions
+      </div>
+      <div class="nav-section">Messaging</div>
+      <div class="nav-item" onclick="showPage('compose',this)">
+        <span class="nav-icon">✉️</span> Compose Message
+      </div>
+      <div class="nav-item" onclick="showPage('msglog',this)">
+        <span class="nav-icon">📋</span> Message Log
+      </div>
+      <div class="nav-section">Files</div>
+      <div class="nav-item" onclick="showPage('vault',this)">
+        <span class="nav-icon">🗂️</span> File Vault
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-pill">
+        <div class="user-avatar" id="user-av">TM</div>
+        <div class="user-info">
+          <div class="name" id="user-name">Tinashe Makanda</div>
+          <div class="role" id="user-role">⭐ Super Admin</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions">
+        <div class="wa-status">
+          <div class="wa-dot" id="wa-dot"></div>
+          <span id="wa-label" style="font-size:12px;color:var(--text-muted)">WhatsApp: Disconnected</span>
+        </div>
+        <div class="badge-notif" onclick="showPage('members',document.querySelector('.nav-item:nth-child(4)'))">⚠️ 2 flagged numbers</div>
+        <button class="btn-outline" onclick="doLogout()">Sign Out</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="notif-bar">
+          <strong>⚠️ 2 members</strong> have cell numbers not registered on WhatsApp. <a href="#" onclick="showPage('members',null);return false;" style="color:var(--danger);font-weight:600;">Review now →</a>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card stat-green"><div class="stat-label">Total Members</div><div class="stat-value">247</div><div class="stat-sub">+12 this month</div></div>
+          <div class="stat-card stat-gold"><div class="stat-label">Active Events</div><div class="stat-value">3</div><div class="stat-sub">1 upcoming</div></div>
+          <div class="stat-card stat-green"><div class="stat-label">Total Raised</div><div class="stat-value">R48,200</div><div class="stat-sub">across all events</div></div>
+          <div class="stat-card stat-danger"><div class="stat-label">Flagged Numbers</div><div class="stat-value">2</div><div class="stat-sub">Not on WhatsApp</div></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+          <div class="section-card">
+            <div class="section-header"><div class="section-title">Recent Events</div><button class="btn-sm" onclick="showPage('events',null)">View All</button></div>
+            <div style="padding:16px 22px;">
+              <div style="margin-bottom:18px;">
+                <div style="font-weight:600;font-size:14px;">Youth Convention 2025</div>
+                <div style="font-size:12px;color:var(--text-muted);margin:2px 0 8px;">14–16 Aug · Joburg · Target: R50,000</div>
+                <div class="event-target">Raised: <strong>R28,500</strong> / R50,000</div>
+                <div class="progress-wrap"><div class="progress-bar" style="width:57%"></div></div>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:14px;">Economy Summit</div>
+                <div style="font-size:12px;color:var(--text-muted);margin:2px 0 8px;">22 Sep · Cape Town · Target: R20,000</div>
+                <div class="event-target">Raised: <strong>R12,400</strong> / R20,000</div>
+                <div class="progress-wrap"><div class="progress-bar gold" style="width:62%"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section-card">
+            <div class="section-header"><div class="section-title">WhatsApp Status</div>
+              <button class="btn-sm" id="wa-connect-btn" onclick="toggleWA()">Connect</button>
+            </div>
+            <div style="padding:22px;">
+              <div id="wa-qr-area" style="text-align:center;padding:20px;background:var(--surface);border-radius:8px;font-size:13px;color:var(--text-muted);">
+                Click "Connect" to generate QR code.<br/>Scan with WhatsApp on your phone to link.
+              </div>
+              <div style="margin-top:16px;font-size:13px;color:var(--text-muted);">
+                Last session: <strong>Never</strong><br/>
+                Messages sent today: <strong>0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEMBERS -->
+      <div class="page" id="page-members">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Members</div>
+            <button class="btn-sm" onclick="openModal('modal-add-member')">+ Add Member</button>
+          </div>
+          <div class="filter-bar">
+            <input type="text" placeholder="Search name, number, city..." oninput="filterMembers(this.value)"/>
+            <select onchange="filterMembers()"><option value="">All Provinces</option><option>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option><option>Eastern Cape</option><option>Limpopo</option></select>
+            <select onchange="filterMembers()"><option value="">All Taskforces</option><option>Economy</option><option>Protocol</option><option>Outreach</option><option>Worship & Arts</option></select>
+            <select onchange="filterMembers()"><option value="">All Age Ranges</option><option>Overcomers (12–18)</option><option>Achievers (19–35)</option></select>
+            <select onchange="filterMembers()"><option value="">All Status</option><option>⚠️ Flagged</option></select>
+          </div>
+          <div class="table-wrap">
+            <table id="members-table">
+              <thead><tr>
+                <th>Name</th><th>Cell</th><th>WhatsApp</th><th>Province</th><th>City</th><th>Taskforce</th><th>Age Range</th><th>Church</th><th>Actions</th>
+              </tr></thead>
+              <tbody id="members-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMINS -->
+      <div class="page" id="page-admins">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Admins</div>
+            <button class="btn-sm" onclick="openModal('modal-add-admin')">+ Add Admin</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Cell</th><th>Email</th><th>Province</th><th>City</th><th>Church</th><th>Role</th><th>Actions</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><strong>Tinashe Makanda</strong></td>
+                  <td>0652920805</td>
+                  <td>symphonytone@gmail.com</td>
+                  <td>Gauteng</td><td>Johannesburg</td><td>Joburg Central</td>
+                  <td><span class="pill pill-gold">⭐ Super Admin</span></td>
+                  <td><span style="color:var(--text-muted);font-size:12px;">Owner</span></td>
+                </tr>
+                <tr>
+                  <td>Sifiso Dlamini</td>
+                  <td>0714567890</td>
+                  <td>sifiso@sayet.org</td>
+                  <td>KwaZulu-Natal</td><td>Durban</td><td>City Harvest</td>
+                  <td><span class="pill pill-green">Admin</span></td>
+                  <td><button class="btn-danger-sm">Remove</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- EVENTS -->
+      <div class="page" id="page-events">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Events</div>
+            <button class="btn-sm" onclick="openModal('modal-add-event')">+ Create Event</button>
+          </div>
+          <div class="events-grid" id="events-grid"></div>
+        </div>
+      </div>
+
+      <!-- CONTRIBUTIONS -->
+      <div class="page" id="page-contributions">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">Event Contributions</div>
+            <select id="contrib-event-select" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+              <option>Youth Convention 2025</option>
+              <option>Economy Summit</option>
+              <option>Outreach Day</option>
+            </select>
+          </div>
+          <div style="padding:16px 22px;background:var(--surface);border-bottom:1px solid var(--border);">
+            <span style="font-size:14px;">Target: <strong>R50,000</strong></span>&nbsp;&nbsp;
+            <span style="font-size:14px;color:var(--green);">Raised: <strong>R28,500</strong></span>&nbsp;&nbsp;
+            <span style="font-size:14px;color:var(--text-muted);">Remaining: R21,500</span>
+            <div class="progress-wrap" style="margin-top:10px;"><div class="progress-bar" style="width:57%"></div></div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Member</th><th>Cell</th><th>Province</th><th>Amount Contributed</th><th>Update Contribution</th></tr></thead>
+              <tbody>
+                <tr><td>Amara Nkosi</td><td>0821234567</td><td>Gauteng</td><td><strong style="color:var(--green)">R250</strong></td>
+                  <td><div class="contrib-input"><input type="number" placeholder="R0"/><button>Update</button></div></td></tr>
+                <tr><td>Thabo Sithole</td><td>0734567890</td><td>Limpopo</td><td><strong style="color:var(--green)">R100</strong></td>
+                  <td><div class="contrib-input"><input type="number" placeholder="R0"/><button>Update</button></div></td></tr>
+                <tr><td>Zanele Mokoena</td><td>0671234567</td><td>Gauteng</td><td><strong style="color:var(--text-muted)">R0</strong></td>
+                  <td><div class="contrib-input"><input type="number" placeholder="R0"/><button>Update</button></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPOSE -->
+      <div class="page" id="page-compose">
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">Compose WhatsApp Message</div></div>
+          <div style="padding:22px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+              <div class="form-group"><label>Target Audience</label>
+                <select><option>All Members</option><option>Economy Taskforce</option><option>Overcomers (12–18)</option><option>Achievers (19–35)</option><option>Gauteng Members</option></select>
+              </div>
+              <div class="form-group"><label>Linked Event</label>
+                <select><option>None</option><option>Youth Convention 2025</option><option>Economy Summit</option></select>
+              </div>
+              <div class="form-group"><label>Attach Flier</label>
+                <input type="file" accept="image/*,.pdf"/>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:10px;"><label>Message Template</label></div>
+            <div class="template-vars">
+              <span style="font-size:12px;color:var(--text-muted);align-self:center;">Insert variable:</span>
+              <span class="var-chip" onclick="insertVar('{Name}')">👤 {Name}</span>
+              <span class="var-chip" onclick="insertVar('{City}')">🏙️ {City}</span>
+              <span class="var-chip" onclick="insertVar('{Province}')">🗺️ {Province}</span>
+              <span class="var-chip" onclick="insertVar('{Church}')">⛪ {Church}</span>
+              <span class="var-chip" onclick="insertVar('{Event}')">📅 {Event}</span>
+              <span class="var-chip" onclick="insertVar('{EventDate}')">🗓️ {EventDate}</span>
+              <span class="var-chip" onclick="insertVar('{EventAddress}')">📍 {EventAddress}</span>
+              <span class="var-chip" onclick="insertVar('{Target}')">💰 {Target}</span>
+            </div>
+            <textarea class="msg-template-area" id="msg-area" style="margin:0 0 16px;">Shalom {Name},
+
+Greetings to you and the family in {City}.
+
+We are having our {Event} on the {EventDate} at {EventAddress}.
+
+Kindly contribute towards this amazing convention.
+
+God bless you.
+SA Youth Economy Taskforce</textarea>
+            <div style="display:flex;gap:12px;align-items:center;">
+              <button class="btn-sm" onclick="previewMsg()">Preview Message</button>
+              <button class="btn-outline" onclick="sendMessages()">📤 Send to Selected Audience</button>
+              <span style="font-size:12px;color:var(--text-muted);">Estimated recipients: <strong>247</strong></span>
+            </div>
+          </div>
+        </div>
+        <div class="section-card" id="preview-card" style="display:none;">
+          <div class="section-header"><div class="section-title">Message Preview</div></div>
+          <div style="padding:22px;">
+            <div style="background:#e8f5e9;border-radius:12px;padding:18px;max-width:380px;font-size:14px;line-height:1.7;white-space:pre-line;" id="preview-content"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MSG LOG -->
+      <div class="page" id="page-msglog">
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">Message History</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Event</th><th>Audience</th><th>Sent</th><th>Delivered</th><th>Bounced / Flagged</th><th>Flier</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>15 Jul 2025</td><td>Youth Convention 2025</td><td>All Members</td>
+                  <td>247</td><td><span class="pill pill-green">243</span></td>
+                  <td><span class="pill pill-danger">4</span></td>
+                  <td><a href="#" style="color:var(--green);font-size:12px;">View flier</a></td>
+                </tr>
+                <tr>
+                  <td>1 Jun 2025</td><td>Economy Summit</td><td>Economy Taskforce</td>
+                  <td>58</td><td><span class="pill pill-green">57</span></td>
+                  <td><span class="pill pill-gray">1</span></td>
+                  <td><span style="color:var(--text-muted);font-size:12px;">None</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VAULT -->
+      <div class="page" id="page-vault">
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">File Vault</div>
+            <select style="padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:inherit;font-size:13px;">
+              <option>Youth Convention 2025</option><option>Economy Summit</option><option>Outreach Day</option>
+            </select>
+          </div>
+          <div style="padding:22px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+            <div style="border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;cursor:pointer;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='white'">
+              <div style="font-size:36px;margin-bottom:8px;">🖼️</div>
+              <div style="font-size:13px;font-weight:500;">Convention_Flier_Final.jpg</div>
+              <div style="font-size:11px;color:var(--text-muted);">2.1 MB · 15 Jul 2025</div>
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;cursor:pointer;" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='white'">
+              <div style="font-size:36px;margin-bottom:8px;">📄</div>
+              <div style="font-size:13px;font-weight:500;">Programme.pdf</div>
+              <div style="font-size:11px;color:var(--text-muted);">540 KB · 12 Jul 2025</div>
+            </div>
+            <div style="border:2px dashed var(--border);border-radius:8px;padding:16px;text-align:center;cursor:pointer;color:var(--text-muted);" onclick="alert('Upload file dialog')">
+              <div style="font-size:32px;margin-bottom:8px;">➕</div>
+              <div style="font-size:13px;">Upload File</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-add-member">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add New Member</div>
+      <button class="modal-close" onclick="closeModal('modal-add-member')">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>First Name</label><input type="text" placeholder="Amara"/></div>
+      <div class="form-group"><label>Surname</label><input type="text" placeholder="Nkosi"/></div>
+      <div class="form-group"><label>Cell Number</label><input type="tel" placeholder="0821234567"/></div>
+      <div class="form-group"><label>Gender</label>
+        <select><option value="">Select...</option><option>Male</option><option>Female</option></select>
+      </div>
+      <div class="form-group"><label>Age</label><input type="number" placeholder="24"/></div>
+      <div class="form-group"><label>Birthday</label><input type="date"/></div>
+      <div class="form-group"><label>Province</label>
+        <select><option value="">Select...</option><option>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option><option>Eastern Cape</option><option>Northern Cape</option><option>North West</option><option>Mpumalanga</option><option>Limpopo</option><option>Free State</option></select>
+      </div>
+      <div class="form-group"><label>City</label>
+        <select><option value="">Select...</option><option>Johannesburg</option><option>Cape Town</option><option>Durban</option><option>Pretoria</option><option>Port Elizabeth</option><option>Bloemfontein</option><option>Polokwane</option><option>Nelspruit</option><option>Kimberley</option></select>
+      </div>
+      <div class="form-group full"><label>Church</label>
+        <input type="text" list="church-list" placeholder="Type or select church..."/>
+        <datalist id="church-list"><option>Joburg Central</option><option>City Harvest</option><option>Rhema Church</option><option>Grace Bible Church</option></datalist>
+      </div>
+      <div class="form-group"><label>Taskforce</label>
+        <select><option value="">Select...</option><option>Economy</option><option>Protocol</option><option>Outreach</option><option>Worship &amp; Arts</option></select>
+      </div>
+      <div class="form-group"><label>Age Range</label>
+        <select><option value="">Select...</option><option>Overcomers (12–18)</option><option>Achievers (19–35)</option></select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="addMember()">Save Member</button>
+      <button class="btn-outline" onclick="closeModal('modal-add-member')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-admin">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Admin</div>
+      <button class="modal-close" onclick="closeModal('modal-add-admin')">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group"><label>First Name</label><input type="text"/></div>
+      <div class="form-group"><label>Surname</label><input type="text"/></div>
+      <div class="form-group"><label>Cell Number</label><input type="tel"/></div>
+      <div class="form-group"><label>Email</label><input type="email"/></div>
+      <div class="form-group"><label>Province</label>
+        <select><option value="">Select...</option><option>Gauteng</option><option>Western Cape</option><option>KwaZulu-Natal</option></select>
+      </div>
+      <div class="form-group"><label>City</label><input type="text"/></div>
+      <div class="form-group full"><label>Church</label><input type="text" list="church-list"/></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closeModal('modal-add-admin');alert('Admin added!')">Save Admin</button>
+      <button class="btn-outline" onclick="closeModal('modal-add-admin')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-event">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Create Event</div>
+      <button class="modal-close" onclick="closeModal('modal-add-event')">×</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Event Title</label><input type="text" placeholder="Youth Convention 2025"/></div>
+      <div class="form-group"><label>Start Date &amp; Time</label><input type="datetime-local"/></div>
+      <div class="form-group"><label>End Date &amp; Time</label><input type="datetime-local"/></div>
+      <div class="form-group full"><label>Address</label><input type="text" placeholder="123 Main St, Johannesburg"/></div>
+      <div class="form-group"><label>Fundraising Target (R)</label><input type="number" placeholder="50000"/></div>
+      <div class="form-group"><label>Flier (image or PDF)</label><input type="file" accept="image/*,.pdf"/></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-sm" onclick="closeModal('modal-add-event');alert('Event created!')">Create Event</button>
+      <button class="btn-outline" onclick="closeModal('modal-add-event')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Sample data
+const members = [
+  { name:'Amara Nkosi', cell:'0821234567', wa:true, province:'Gauteng', city:'Johannesburg', taskforce:'Economy', ageRange:'Achievers (19–35)', church:'Joburg Central' },
+  { name:'Thabo Sithole', cell:'0734567890', wa:true, province:'Limpopo', city:'Polokwane', taskforce:'Outreach', ageRange:'Achievers (19–35)', church:'Grace Bible Church' },
+  { name:'Zanele Mokoena', cell:'0671234567', wa:false, province:'Gauteng', city:'Pretoria', taskforce:'Worship & Arts', ageRange:'Overcomers (12–18)', church:'Rhema Church' },
+  { name:'Sipho Dube', cell:'0823456789', wa:true, province:'KwaZulu-Natal', city:'Durban', taskforce:'Protocol', ageRange:'Achievers (19–35)', church:'City Harvest' },
+  { name:'Nomsa Khumalo', cell:'0789012345', wa:false, province:'Western Cape', city:'Cape Town', taskforce:'Economy', ageRange:'Achievers (19–35)', church:'Joburg Central' },
+  { name:'Bongani Zulu', cell:'0712345678', wa:true, province:'Mpumalanga', city:'Nelspruit', taskforce:'Outreach', ageRange:'Overcomers (12–18)', church:'City Harvest' },
+];
+
+const events = [
+  { title:'Youth Convention 2025', start:'14 Aug 2025', end:'16 Aug 2025', address:'CTICC, Cape Town', target:50000, raised:28500, color:'#1a7a4a' },
+  { title:'Economy Summit', start:'22 Sep 2025', end:'22 Sep 2025', address:'Gallagher Estate, Midrand', target:20000, raised:12400, color:'#c9920a' },
+  { title:'Outreach Day', start:'5 Oct 2025', end:'5 Oct 2025', address:'Soweto Community Centre', target:8000, raised:3200, color:'#2563eb' },
+];
+
+function renderMembers(data) {
+  const tbody = document.getElementById('members-tbody');
+  tbody.innerHTML = data.map(m => `
+    <tr>
+      <td><strong>${m.name}</strong></td>
+      <td>${m.cell}</td>
+      <td>${m.wa ? '<span class="pill pill-green">✓ Active</span>' : '<span class="flag-warn">⚠️ Not on WA</span>'}</td>
+      <td>${m.province}</td>
+      <td>${m.city}</td>
+      <td><span class="pill pill-gray">${m.taskforce}</span></td>
+      <td>${m.ageRange.split(' ')[0]}</td>
+      <td>${m.church}</td>
+      <td style="display:flex;gap:6px;">
+        <button class="btn-outline" style="padding:5px 10px;font-size:12px;" onclick="alert('Edit ${m.name}')">Edit</button>
+        <button class="btn-danger-sm" onclick="alert('Remove ${m.name}')">Remove</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderEvents() {
+  const grid = document.getElementById('events-grid');
+  grid.innerHTML = events.map(e => {
+    const pct = Math.round(e.raised/e.target*100);
+    return `
+    <div class="event-card">
+      <div class="event-banner" style="background:${e.color}"></div>
+      <div class="event-body">
+        <div class="event-title">${e.title}</div>
+        <div class="event-meta">📅 ${e.start}${e.start!==e.end?' – '+e.end:''}<br/>📍 ${e.address}</div>
+        <div class="event-target">Target: <span class="event-amount">R${e.target.toLocaleString()}</span></div>
+        <div class="event-target">Raised: <strong style="color:${e.color}">R${e.raised.toLocaleString()}</strong> (${pct}%)</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${e.color}"></div></div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button class="btn-outline" style="font-size:12px;padding:6px 12px;">Edit</button>
+          <button class="btn-sm" style="font-size:12px;padding:6px 12px;" onclick="showPage('compose',null)">Send Message</button>
+          <button class="btn-danger-sm" style="font-size:12px;">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterMembers(val) {
+  renderMembers(members.filter(m =>
+    !val || m.name.toLowerCase().includes(val.toLowerCase()) || m.cell.includes(val) || m.city.toLowerCase().includes(val.toLowerCase())
+  ));
+}
+
+function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const pass = document.getElementById('login-pass').value;
+  if (email && pass) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    renderMembers(members);
+    renderEvents();
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+const pageTitles = {dashboard:'Dashboard',members:'Members',admins:'Admins',events:'Events',contributions:'Contributions',compose:'Compose Message',msglog:'Message Log',vault:'File Vault'};
+
+function showPage(id, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('topbar-title').textContent = pageTitles[id] || id;
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function addMember() {
+  closeModal('modal-add-member');
+  alert('Member saved! In production, this posts to your API and validates the WhatsApp number.');
+}
+
+function insertVar(v) {
+  const ta = document.getElementById('msg-area');
+  const pos = ta.selectionStart;
+  ta.value = ta.value.slice(0,pos) + v + ta.value.slice(pos);
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = pos + v.length;
+}
+
+function previewMsg() {
+  const tpl = document.getElementById('msg-area').value;
+  const preview = tpl
+    .replace(/{Name}/g, 'Amara Nkosi')
+    .replace(/{City}/g, 'Johannesburg')
+    .replace(/{Province}/g, 'Gauteng')
+    .replace(/{Church}/g, 'Joburg Central')
+    .replace(/{Event}/g, 'Youth Convention 2025')
+    .replace(/{EventDate}/g, 'Friday 14 August 2025')
+    .replace(/{EventAddress}/g, 'CTICC, Cape Town')
+    .replace(/{Target}/g, 'R50,000');
+  document.getElementById('preview-content').textContent = preview;
+  document.getElementById('preview-card').style.display = 'block';
+}
+
+function sendMessages() {
+  if (confirm('Send this message to 247 members? This will use the connected WhatsApp session.')) {
+    alert('In production: Backend queues messages, validates each number on WhatsApp, sends personalized messages, logs delivery status, and flags bounced numbers.');
+  }
+}
+
+let waConnected = false;
+function toggleWA() {
+  waConnected = !waConnected;
+  const dot = document.getElementById('wa-dot');
+  const label = document.getElementById('wa-label');
+  const btn = document.getElementById('wa-connect-btn');
+  const qr = document.getElementById('wa-qr-area');
+  if (waConnected) {
+    dot.classList.add('connected');
+    label.textContent = 'WhatsApp: Connected';
+    btn.textContent = 'Disconnect';
+    btn.style.background = 'var(--danger)';
+    qr.innerHTML = '<div style="color:var(--green);font-size:15px;font-weight:600;">✓ WhatsApp session active</div><div style="font-size:12px;color:var(--text-muted);margin-top:6px;">Messages can now be sent</div>';
+  } else {
+    dot.classList.remove('connected');
+    label.textContent = 'WhatsApp: Disconnected';
+    btn.textContent = 'Connect';
+    btn.style.background = 'var(--green)';
+    qr.innerHTML = 'Click "Connect" to generate QR code.<br/>Scan with WhatsApp on your phone to link.';
+  }
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
