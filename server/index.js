@@ -14,8 +14,21 @@ const { initClient } = require('./whatsapp');
 initClient();
 console.log('WhatsApp client initialized on server startup');
 
+// Allow multiple client origins (local dev + Render deployments)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://sayet-client.onrender.com',
+  'https://followapp-client.onrender.com',
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked: ${origin}`));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
