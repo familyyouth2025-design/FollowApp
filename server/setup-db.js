@@ -18,12 +18,12 @@ async function setupDatabase() {
     const result = await db.query('SELECT * FROM admins LIMIT 1');
     
     if (result.rows.length === 0) {
-      const passwordHash = await bcrypt.hash('admin123', 10);
+      const passwordHash = await bcrypt.hash('Mightyman7$', 10);
       await db.query(`
         INSERT INTO admins (first_name, surname, cell, email, password_hash, role, province, city, church)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      `, ['Admin', 'User', '0123456789', 'admin@sayet.com', passwordHash, 'super_admin', 'Gauteng', 'Johannesburg', 'Head Office']);
-      console.log('✅ Default admin created: admin@sayet.com / admin123');
+      `, ['Admin', 'User', '0123456789', 'symphonytone@gmail.com', passwordHash, 'super_admin', 'Gauteng', 'Johannesburg', 'Head Office']);
+      console.log('✅ Default admin created: symphonytone@gmail.com / Mightyman7$');
     } else {
       console.log('ℹ️ Admin already exists, skipping default admin creation');
     }
