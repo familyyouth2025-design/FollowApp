@@ -1,18 +1,14 @@
 const { Pool } = require('pg');
 
-// Debug: log what DATABASE_URL contains (hide password)
-const rawUrl = process.env.DATABASE_URL || '';
-console.log('DATABASE_URL exists:', !!rawUrl);
-console.log('DATABASE_URL length:', rawUrl.length);
-if (rawUrl) {
-  const masked = rawUrl.replace(/:([^@]+)@/, ':***@');
-  console.log('DATABASE_URL (masked):', masked);
-}
+// The correct external database URL from Render
+const FALLBACK_DB_URL = 'postgresql://followapp:BLR5PuWGYzvxBkVVSKhq5SqmRtAPHFIt@dpg-d8hfhfjtqb8s739ra8rg-a.oregon-postgres.render.com/followapp';
 
-// Fix truncated Render internal DB URLs by appending the region if missing
-let databaseUrl = rawUrl;
-if (databaseUrl.includes('@dpg-') && !databaseUrl.includes('postgres.render.com')) {
-  databaseUrl = databaseUrl.replace('/followapp', '.oregon-postgres.render.com/followapp');
+let databaseUrl = process.env.DATABASE_URL || FALLBACK_DB_URL;
+
+// If URL is empty or still connects to localhost, use fallback
+if (!databaseUrl || databaseUrl.includes('localhost') || databaseUrl.includes('127.0.0.1')) {
+  console.log('DATABASE_URL missing/invalid, using fallback');
+  databaseUrl = FALLBACK_DB_URL;
 }
 
 const pool = new Pool({
