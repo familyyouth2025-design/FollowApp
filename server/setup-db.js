@@ -6,7 +6,10 @@ async function setupDatabase() {
   try {
     // Run schema.sql to create all tables
     const schemaPath = path.join(__dirname, '..', 'db', 'schema.sql');
+    console.log('Reading schema from:', schemaPath);
     const schema = fs.readFileSync(schemaPath, 'utf8');
+    console.log('Schema file loaded, length:', schema.length);
+    
     await db.query(schema);
     console.log('✅ Database tables created successfully');
 
@@ -25,7 +28,8 @@ async function setupDatabase() {
       console.log('ℹ️ Admin already exists, skipping default admin creation');
     }
   } catch (err) {
-    console.error('❌ Database setup error:', err.message);
+    console.error('❌ Database setup error:', err.message || err);
+    console.error('Stack:', err.stack || 'No stack');
     throw err;
   }
 }
